@@ -1,0 +1,5 @@
+{"properties": [{
+  "name": "opc.ua.server",
+  "type": "java.lang.String",
+  "description": "A description for 'opc.ua.server'"
+}]}
