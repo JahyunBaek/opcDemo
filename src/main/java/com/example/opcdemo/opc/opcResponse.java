@@ -1,5 +1,7 @@
 package com.example.opcdemo.opc;
 
+
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -7,5 +9,5 @@ import lombok.Data;
 @Builder
 public class opcResponse {
     private long totalCount;
-    private long successCount;
+    private long successCount;   
 }
