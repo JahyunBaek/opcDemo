@@ -13,6 +13,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -59,7 +60,45 @@ public class opcServiceImpl implements opcService {
 		});
 
 		
-		OpcUaClient client = OpcUaClient.create(
+		OpcUaClient client = createOpcClient();
+		
+		client.connect().get();
+		
+		CompletableFuture<List<StatusCode>> f = client.writeValues(nodeList, dataList);
+		List<StatusCode> s = f.get();
+
+		future.complete(client);
+
+        return s;
+    }
+
+	@Override
+	public List<DataValue> opcRemoteRead(List<String> tagList)
+			throws UaException, InterruptedException, ExecutionException {
+
+		List<NodeId> nodeList = new ArrayList<NodeId>();
+		CompletableFuture<OpcUaClient> future = new CompletableFuture<OpcUaClient>();
+		
+		tagList.stream().forEach(x -> {
+			NodeId node = new NodeId(2,x);
+			nodeList.add(node);
+		});
+
+		
+		OpcUaClient client = createOpcClient();
+		
+		client.connect().get();
+		
+		CompletableFuture<List<DataValue>> f = client.readValues(0.0, TimestampsToReturn.Both, nodeList);
+		List<DataValue> s = f.get();
+
+		future.complete(client);
+
+		return s;
+	}
+
+	private OpcUaClient createOpcClient() throws UaException{
+		return OpcUaClient.create(
             opcServerUri,
 	            endpoints ->
 	                endpoints.stream()
@@ -72,16 +111,7 @@ public class opcServiceImpl implements opcService {
 	                    .setRequestTimeout(uint(RequestTimeout))
 	                    .build()
 	        );
-		
-		client.connect().get();
-
-		CompletableFuture<List<StatusCode>> f = client.writeValues(nodeList, dataList);
-		List<StatusCode> s = f.get();
-
-		future.complete(client);
-
-        return s;
-    }
+	}
     
     
 }
