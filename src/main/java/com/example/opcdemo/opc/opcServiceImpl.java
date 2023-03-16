@@ -48,7 +48,7 @@ public class opcServiceImpl implements opcService {
 		
 		tagList.stream().forEach(x -> {
 			String currentValue = x.getChangeValue();
-			NodeId node = new NodeId(2,x.getOpcTagCd());
+			NodeId node = new NodeId(2,x.getTagCd());
 			Variant v = null;
 			if(currentValue.equals("true") || currentValue.equals("false")) 
 				v = new Variant(Boolean.valueOf(currentValue));			
@@ -57,7 +57,7 @@ public class opcServiceImpl implements opcService {
 				short convertValue =(short)Math.floor(parseValue);		
 				v = new Variant(ushort(convertValue));				
 			}
-			DataValue dv = new DataValue(v, null, null);
+			DataValue dv = new DataValue(v);
 
 			nodeList.add(node);
 			dataList.add(dv);
@@ -98,7 +98,7 @@ public class opcServiceImpl implements opcService {
 		
 		Stream<opcReadResponse> stream = Streams.zip( tagList.stream(),resultList.stream(),
 		 (id, value) -> opcReadResponse.builder()
-		 .opcTagCd(id).tagValue(String.valueOf(value.getValue().getValue())).build());
+		 .tagCd(id).tagValue(String.valueOf(value.getValue().getValue())).build());
 
 		future.complete(client);
 
