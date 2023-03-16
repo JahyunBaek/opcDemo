@@ -15,6 +15,7 @@ configurations {
 }
 
 repositories {
+	google()  // Google's Maven repository
 	mavenCentral()
 	maven { url 'https://repo.spring.io/milestone' }
 	maven { url 'https://repo.spring.io/snapshot' }
@@ -33,6 +34,8 @@ dependencies {
 	implementation group: 'com.digitalpetri.opcua', name: 'stack-core', version: '1.1.1'
 
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
+
+
 }
 
 tasks.named('test') {

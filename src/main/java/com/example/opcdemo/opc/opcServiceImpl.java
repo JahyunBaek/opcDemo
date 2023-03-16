@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
@@ -15,6 +17,8 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
 import org.springframework.stereotype.Service;
+
+import com.google.common.collect.Streams;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +37,7 @@ public class opcServiceImpl implements opcService {
     @Value("${OPC.UA.ApplicationName}")
     private String opcAppName;
     @Value("${OPC.UA.RequestTimeout}")
-    private Integer RequestTimeout;
+    private Integer opcRequestTimeout;
     
     @Override
     public List<StatusCode> opcRemoteWrite(List<opcRequest> tagList) throws UaException, InterruptedException, ExecutionException{
@@ -44,7 +48,7 @@ public class opcServiceImpl implements opcService {
 		
 		tagList.stream().forEach(x -> {
 			String currentValue = x.getChangeValue();
-			NodeId node = new NodeId(2,x.getOpcTagCd());
+			NodeId node = new NodeId(2,x.getTagCd());
 			Variant v = null;
 			if(currentValue.equals("true") || currentValue.equals("false")) 
 				v = new Variant(Boolean.valueOf(currentValue));			
@@ -53,7 +57,7 @@ public class opcServiceImpl implements opcService {
 				short convertValue =(short)Math.floor(parseValue);		
 				v = new Variant(ushort(convertValue));				
 			}
-			DataValue dv = new DataValue(v, null, null);
+			DataValue dv = new DataValue(v);
 
 			nodeList.add(node);
 			dataList.add(dv);
@@ -65,36 +69,40 @@ public class opcServiceImpl implements opcService {
 		client.connect().get();
 		
 		CompletableFuture<List<StatusCode>> f = client.writeValues(nodeList, dataList);
-		List<StatusCode> s = f.get();
+		List<StatusCode> resultList = f.get();
 
 		future.complete(client);
 
-        return s;
+        return resultList;
     }
 
 	@Override
-	public List<DataValue> opcRemoteRead(List<String> tagList)
+	public List<opcReadResponse> opcRemoteRead(List<String> tagList)
 			throws UaException, InterruptedException, ExecutionException {
 
 		List<NodeId> nodeList = new ArrayList<NodeId>();
 		CompletableFuture<OpcUaClient> future = new CompletableFuture<OpcUaClient>();
-		
+
+
 		tagList.stream().forEach(x -> {
 			NodeId node = new NodeId(2,x);
 			nodeList.add(node);
 		});
-
 		
 		OpcUaClient client = createOpcClient();
 		
 		client.connect().get();
 		
 		CompletableFuture<List<DataValue>> f = client.readValues(0.0, TimestampsToReturn.Both, nodeList);
-		List<DataValue> s = f.get();
+		List<DataValue> resultList = f.get();
+		
+		Stream<opcReadResponse> stream = Streams.zip( tagList.stream(),resultList.stream(),
+		 (id, value) -> opcReadResponse.builder()
+		 .tagCd(id).tagValue(String.valueOf(value.getValue().getValue())).build());
 
 		future.complete(client);
 
-		return s;
+		return stream.collect(Collectors.toList());
 	}
 
 	private OpcUaClient createOpcClient() throws UaException{
@@ -108,7 +116,7 @@ public class opcServiceImpl implements opcService {
 	                configBuilder
 	                    .setApplicationName(LocalizedText.english(opcAppName))
 	                    .setApplicationUri(opcAppUri)                   
-	                    .setRequestTimeout(uint(RequestTimeout))
+	                    .setRequestTimeout(uint(opcRequestTimeout))
 	                    .build()
 	        );
 	}

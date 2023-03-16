@@ -1,13 +1,11 @@
 package com.example.opcdemo.opc;
 
+import lombok.Builder;
 import lombok.Data;
-import lombok.NonNull;
-
 
 @Data
-public class opcRequest {
+@Builder
+public class opcReadResponse {
     private String tagCd;
 	private String tagValue;
-	private String changeValue;
-	private Float scale;
 }
