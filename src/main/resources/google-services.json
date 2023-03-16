@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "1047509054761",
+    "project_id": "nongshimfarm",
+    "storage_bucket": "nongshimfarm.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1047509054761:android:280edede57ca4d757d3338",
+        "android_client_info": {
+          "package_name": "farm.nongshim"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1047509054761-9udpeumhmn9qlb98gb0kdh21956clgdq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "farm.nongshim",
+            "certificate_hash": "350a609cd1c2d6e20f5ad8f61adcf966c3a4b2f7"
+          }
+        },
+        {
+          "client_id": "1047509054761-famdb3h24oeqfd0u3bbs8ftng17r0rem.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDik8Nl_sq9fPVX5YFn5QtAdUx6mJoYVLA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1047509054761-famdb3h24oeqfd0u3bbs8ftng17r0rem.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1047509054761-2ngkbg28sh2n3a62a3k1pi789i2ubod3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.nongshimfarm"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

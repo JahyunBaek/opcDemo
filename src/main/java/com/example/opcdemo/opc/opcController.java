@@ -41,4 +41,13 @@ public class opcController {
         
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
+
+    @PostMapping(value = "/alarm")
+    public ResponseEntity<Object> opcAlarmPush(@RequestBody opcAlarmRequest alarm) throws UaException, InterruptedException, ExecutionException{
+        
+        //FCM 처리
+        System.out.println(alarm);
+        
+        return ResponseEntity.status(HttpStatus.OK).body("ok");
+    }
 }
