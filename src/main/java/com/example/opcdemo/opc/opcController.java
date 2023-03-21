@@ -1,3 +1,4 @@
+
 package com.example.opcdemo.opc;
 
 import org.eclipse.milo.opcua.stack.core.UaException;
@@ -15,7 +16,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
 
-
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/opc")
@@ -23,6 +23,7 @@ public class opcController {
     
 	private final opcService opc;
 
+    
     @PostMapping(value = "/write")
     public ResponseEntity<opcResponse> opcWrite(@RequestBody List<opcRequest> tagList) throws UaException, InterruptedException, ExecutionException{
         

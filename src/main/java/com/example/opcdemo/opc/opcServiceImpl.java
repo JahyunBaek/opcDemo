@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
+import org.eclipse.milo.opcua.stack.core.Stack;
 import org.eclipse.milo.opcua.stack.core.UaException;
 import org.eclipse.milo.opcua.stack.core.security.SecurityPolicy;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
@@ -18,6 +19,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
 import org.springframework.stereotype.Service;
 
+import com.digitalpetri.opcua.stack.core.Identifiers;
 import com.google.common.collect.Streams;
 
 import lombok.RequiredArgsConstructor;
@@ -44,20 +46,23 @@ public class opcServiceImpl implements opcService {
 
         List<NodeId> nodeList = new ArrayList<NodeId>();
 		List<DataValue> dataList = new ArrayList<DataValue>();
-		CompletableFuture<OpcUaClient> future = new CompletableFuture<OpcUaClient>();
+		CompletableFuture<OpcUaClient> future = new CompletableFuture<>();
 		
+
 		tagList.stream().forEach(x -> {
+
 			String currentValue = x.getChangeValue();
-			NodeId node = new NodeId(2,x.getTagCd());
+			NodeId node = new NodeId(2,x.getOpcTagCd());
 			Variant v = null;
-			if(currentValue.equals("true") || currentValue.equals("false")) 
-				v = new Variant(Boolean.valueOf(currentValue));			
-			else{
+			if(x.getDataType().equals(opcType.Boolean)){
+				v = new Variant(currentValue.equals("1") ? true : false);						
+			}else if(x.getDataType().equals(opcType.UInt16)){
 				Float parseValue = Float.parseFloat(currentValue) / x.getScale();						
 				short convertValue =(short)Math.floor(parseValue);		
-				v = new Variant(ushort(convertValue));				
+				v = new Variant(ushort(convertValue));
 			}
-			DataValue dv = new DataValue(v);
+
+			DataValue dv = new DataValue(v,null,null);
 
 			nodeList.add(node);
 			dataList.add(dv);
@@ -66,13 +71,26 @@ public class opcServiceImpl implements opcService {
 		
 		OpcUaClient client = createOpcClient();
 		
+		future.whenCompleteAsync((c, ex) -> {
+            if (ex != null) 
+               System.out.println("error");
+            else
+				System.out.println("input log");
+            try {
+                client.disconnect().get();
+                Stack.releaseSharedResources();
+            } catch (InterruptedException | ExecutionException e) {
+				System.out.println("disconnecting error log");
+            }
+        });
+
 		client.connect().get();
 		
 		CompletableFuture<List<StatusCode>> f = client.writeValues(nodeList, dataList);
 		List<StatusCode> resultList = f.get();
 
 		future.complete(client);
-
+		
         return resultList;
     }
 
@@ -81,9 +99,8 @@ public class opcServiceImpl implements opcService {
 			throws UaException, InterruptedException, ExecutionException {
 
 		List<NodeId> nodeList = new ArrayList<NodeId>();
-		CompletableFuture<OpcUaClient> future = new CompletableFuture<OpcUaClient>();
-
-
+		CompletableFuture<OpcUaClient> future = new CompletableFuture<>();
+		
 		tagList.stream().forEach(x -> {
 			NodeId node = new NodeId(2,x);
 			nodeList.add(node);
@@ -98,9 +115,9 @@ public class opcServiceImpl implements opcService {
 		
 		Stream<opcReadResponse> stream = Streams.zip( tagList.stream(),resultList.stream(),
 		 (id, value) -> opcReadResponse.builder()
-		 .tagCd(id).tagValue(String.valueOf(value.getValue().getValue())).build());
+		 .opcTagCd(id).tagValue(String.valueOf(value.getValue().getValue())).build());
 
-		future.complete(client);
+		 future.complete(client);
 
 		return stream.collect(Collectors.toList());
 	}

@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class opcReadResponse {
-    private String tagCd;
+    private String opcTagCd;
 	private String tagValue;
 }
