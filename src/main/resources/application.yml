@@ -1,6 +1,9 @@
 OPC:
- UA:
-  Server: opc.tcp://127.0.0.1:49320
-  ApplicationName: Kepware.KEPServerEX.V6
-  ApplicationUri: urn:127.0.0.1:Kepware.KEPServerEX.V6:UA%20Client%20Driver
-  RequestTimeout: 5000
+    UA:
+        Server: opc.tcp://127.0.0.1:49320
+        ApplicationName: Kepware.KEPServerEX.V6
+        ApplicationUri: urn:127.0.0.1:Kepware.KEPServerEX.V6:UA%20Client%20Driver
+        RequestTimeout: 5000
+        TrueStr: 1
+        NameSpaceIDX: 2
+

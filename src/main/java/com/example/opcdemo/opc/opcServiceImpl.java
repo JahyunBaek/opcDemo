@@ -40,7 +40,11 @@ public class opcServiceImpl implements opcService {
     private String opcAppName;
     @Value("${OPC.UA.RequestTimeout}")
     private Integer opcRequestTimeout;
-    
+    @Value("${OPC.UA.TrueStr}")
+    private String trueStr;
+	@Value("${OPC.UA.NameSpaceIDX}")
+    private Integer nameSpaceIdx;
+
     @Override
     public List<StatusCode> opcRemoteWrite(List<opcRequest> tagList) throws UaException, InterruptedException, ExecutionException{
 
@@ -52,10 +56,10 @@ public class opcServiceImpl implements opcService {
 		tagList.stream().forEach(x -> {
 
 			String currentValue = x.getChangeValue();
-			NodeId node = new NodeId(2,x.getOpcTagCd());
+			NodeId node = new NodeId(nameSpaceIdx,x.getOpcTagCd());
 			Variant v = null;
 			if(x.getDataType().equals(opcType.Boolean)){
-				v = new Variant(currentValue.equals("1") ? true : false);						
+				v = new Variant(currentValue.equals(trueStr) ? true : false);						
 			}else if(x.getDataType().equals(opcType.UInt16)){
 				Float parseValue = Float.parseFloat(currentValue) / x.getScale();						
 				short convertValue =(short)Math.floor(parseValue);		
@@ -72,13 +76,14 @@ public class opcServiceImpl implements opcService {
 		OpcUaClient client = createOpcClient();
 		
 		future.whenCompleteAsync((c, ex) -> {
-            if (ex != null) 
-               System.out.println("error");
-            else
-				System.out.println("input log");
-            try {
-                client.disconnect().get();
+			try {
+                c.disconnect().get();
                 Stack.releaseSharedResources();
+
+				if (ex != null) 
+               		System.out.println("error");
+				else
+					System.out.println("input log");
             } catch (InterruptedException | ExecutionException e) {
 				System.out.println("disconnecting error log");
             }
@@ -101,8 +106,22 @@ public class opcServiceImpl implements opcService {
 		List<NodeId> nodeList = new ArrayList<NodeId>();
 		CompletableFuture<OpcUaClient> future = new CompletableFuture<>();
 		
+		future.whenCompleteAsync((c, ex) -> {
+			try {
+                c.disconnect().get();
+                Stack.releaseSharedResources();
+
+				if (ex != null) 
+               		System.out.println("error");
+				else
+					System.out.println("input log");
+            } catch (InterruptedException | ExecutionException e) {
+				System.out.println("disconnecting error log");
+            }
+        });
+
 		tagList.stream().forEach(x -> {
-			NodeId node = new NodeId(2,x);
+			NodeId node = new NodeId(nameSpaceIdx,x);
 			nodeList.add(node);
 		});
 		
