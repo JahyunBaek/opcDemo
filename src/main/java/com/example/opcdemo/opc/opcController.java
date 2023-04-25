@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/opc")
@@ -30,7 +32,7 @@ public class opcController {
         List<StatusCode> result = opc.opcRemoteWrite(tagList);
 
         opcResponse response = opcResponse.builder().successCount(
-            result.stream().filter(x -> x.isGood()).count()).totalCount(tagList.size()).build();
+            result.stream().filter(StatusCode::isGood).count()).totalCount(tagList.size()).build();
             
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -47,7 +49,7 @@ public class opcController {
     public ResponseEntity<Object> opcAlarmPush(@RequestBody opcAlarmRequest alarm) throws UaException, InterruptedException, ExecutionException{
         
         //FCM 처리
-        System.out.println(alarm);
+        log.info("opcAlarmRequest ======>"+alarm);
         
         return ResponseEntity.status(HttpStatus.OK).body("ok");
     }

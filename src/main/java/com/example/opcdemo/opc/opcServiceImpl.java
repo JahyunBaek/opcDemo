@@ -23,6 +23,8 @@ import com.digitalpetri.opcua.stack.core.Identifiers;
 import com.google.common.collect.Streams;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.uint;
@@ -30,6 +32,7 @@ import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class opcServiceImpl implements opcService {
 
     @Value("${OPC.UA.Server}")
@@ -81,11 +84,11 @@ public class opcServiceImpl implements opcService {
                 Stack.releaseSharedResources();
 
 				if (ex != null) 
-               		System.out.println("error");
+               		log.error("error");
 				else
-					System.out.println("input log");
+					log.info("input log");
             } catch (InterruptedException | ExecutionException e) {
-				System.out.println("disconnecting error log");
+					log.error("disconnecting error log");
             }
         });
 
@@ -112,11 +115,11 @@ public class opcServiceImpl implements opcService {
                 Stack.releaseSharedResources();
 
 				if (ex != null) 
-               		System.out.println("error");
+					log.error("error");
 				else
-					System.out.println("input log");
+					log.info("input log");
             } catch (InterruptedException | ExecutionException e) {
-				System.out.println("disconnecting error log");
+					log.info("disconnecting error log");
             }
         });
 
